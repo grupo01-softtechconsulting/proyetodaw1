@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     'start',
+    'question',
 ]
 
 MIDDLEWARE = [
