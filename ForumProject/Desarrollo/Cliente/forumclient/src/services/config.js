@@ -1,6 +1,5 @@
 const configService = {
-    apiUrl: 'https://localhost:8001/'
-  }
-  
-  export default configService
-  
+  apiUrl: 'http://52.15.210.184:82/'
+}
+
+export default configService

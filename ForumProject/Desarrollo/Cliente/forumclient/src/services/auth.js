@@ -20,7 +20,7 @@ api.authenticate = function (loginData) {
     .then(res => res.data)
 }
 
-api.authenticate = function (userData) {
+api.register = function (userData) {
   return axios.post(
     '/register-api/',
     { first_name: userData['first_name'],
