@@ -27,7 +27,7 @@ class PersonSerializer(ModelSerializer):
     class Meta:
         """ Meta class for Person serializer """
         model = Person
-        fields = ['id', 'user', 'type', 'person_image', 'num_questions']
+        fields = ['id', 'user', 'role', 'person_image', 'num_questions']
         extra_kwargs = {'id': {'read_only': True, 'required': False}}
 
     def __init__(self, *args, **kwargs):
@@ -53,8 +53,8 @@ class PersonSerializer(ModelSerializer):
                 if user_data['email'] != '':
                     user.first_name = user_data['email']
             user.save()
-        if 'type' in validated_data:
-            instance.type = validated_data.pop('type')
+        if 'role' in validated_data:
+            instance.type = validated_data.pop('role')
         instance.save()
         return instance
 
