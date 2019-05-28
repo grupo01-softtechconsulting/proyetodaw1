@@ -1,4 +1,7 @@
 """ Views for gestion app """
+from rest_framework.viewsets import ModelViewSet
+
+from start.serializers import PersonSerializer
 from start.utils import create_user
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -59,6 +62,30 @@ class AuthenticateUserAPI(APIView):
                 person_id = Person.objects.get(user=user).id
                 return Response({'status': True, 'person_id': person_id})
         return Response({'status': False})
+
+
+class PersonAPI(ModelViewSet):
+    """ API class to manage Person serializer """
+    authentication_classes = [CsrfExemptSessionAuthentication,
+                              BasicAuthentication]
+    permission_classes = [AllowAny]
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        """ Method to redefine the queryset """
+        if 'email' in self.request.GET:
+            if (Person.objects.filter(user__email=self.request.GET['email'])
+                    .exists()):
+                queryset = (Person.objects
+                            .filter(user__email=self.request.GET['email']))
+            else:
+                queryset = []
+        else:
+            queryset = Person.objects.all()
+        return queryset
+
 
 
 class RegisterUserAPI(APIView):
