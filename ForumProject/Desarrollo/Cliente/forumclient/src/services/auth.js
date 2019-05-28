@@ -36,4 +36,27 @@ api.register = function (userData) {
     .then(res => res.data)
 }
 
+api.obtainPerson = function () {
+  return axios.get(
+    '/person-api/' + localStorage.getItem('personId')
+  )
+    .then(res => res.data)
+}
+
+api.updatePerson = function (userData) {
+  return axios.patch(
+    '/person-api/' + localStorage.getItem('personId') + '/',
+    { user: {
+      first_name: userData['first_name'],
+      last_name: userData['last_name'],
+      email: userData['email']
+    }
+    },
+    { headers: {
+      'Content-Type': 'application/json'
+    } }
+  )
+    .then(res => res.data)
+}
+
 export default api

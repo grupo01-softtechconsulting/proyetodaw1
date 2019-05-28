@@ -154,9 +154,9 @@ export default {
           password: this.password
         }
         api.register(jsonData).then(res => {
-          console.log(res)
           if (res.status) {
-            
+            localStorage.setItem('personId', res.person_id)
+            this.$router.push({ name: "profile" })
           } else {
             this.loadingButton = false
           }
