@@ -82,7 +82,8 @@ class RegisterUserAPI(APIView):
                                              password=dictionary_post['password'])
                 if new_user_auth:
                     login(request, new_user_auth)
-                    return Response({'status': True})
+                    return Response({'status': True,
+                                     'person_id': new_user.person.id})
                 else:
                     return Response({'status': False})
         return Response({'status': False})
