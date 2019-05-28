@@ -1,29 +1,42 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+  <div id="appRoot">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <template v-if="!$route.meta.isPublic">
+      <v-app id="inspire" class="app">
+        <v-content>
+          <!-- Page Header -->
+          <!-- Content -->
+          <div class="page-wrapper">
+            <router-view></router-view>
     </div>
-    <router-view/>
+           <!-- App Footer -->
+        </v-content>
+        <!-- Go to top -->
+      </v-app>
+    </template>
+    <template v-else>
+      <transition>
+        <keep-alive>
+          <router-view></router-view>
+        </keep-alive>
+      </transition>
+    </template>
   </div>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+<script>
+export default {
+  name: 'App',
+  components: {
+  },
+  data () {
+    return {
     }
+  },
+  created () {
   }
 }
+</script>
+
+<style lang="scss">
 </style>
