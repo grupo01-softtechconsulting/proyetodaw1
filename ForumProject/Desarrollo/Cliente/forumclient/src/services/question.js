@@ -26,7 +26,7 @@ api.createQuestion = function (questionData) {
 api.updateQuestion = function (questionData) {
   return axios.patch(
     '/question/question-api/' + questionData['question_id'].toString() + '/',
-    { 
+    {
       title: questionData['title'],
       statement: questionData['statement']
     },
@@ -51,7 +51,7 @@ api.deleteQuestion = function (questionId) {
 
 /** Gets questions submitted to the platform */
 api.getAllQuestionsList = function (filtersData) {
-  var dataParams = {};
+  var dataParams = {}
   if ('last_questions' in filtersData) {
     dataParams['last_questions'] = true
   } else {
@@ -108,7 +108,6 @@ api.getQuestionData = function (questionId) {
   ).then(res => res.data)
 }
 
-
 /** Gets answers submitted to a certain question */
 api.getAnswersList = function (questionId) {
   return axios.get(
@@ -126,7 +125,7 @@ api.getAnswersList = function (questionId) {
 api.createAnswer = function (answerData) {
   return axios.post(
     '/question/answer-api/',
-    { 
+    {
       creator: localStorage.getItem('personId'),
       question: answerData['question_id'],
       statement: answerData['statement']
@@ -142,7 +141,7 @@ api.createAnswer = function (answerData) {
 api.updateAnswer = function (answerData) {
   return axios.patch(
     '/question/answer-api/' + answerData['answer_id'].toString() + '/',
-    { 
+    {
       statement: answerData['statement']
     },
     { headers: {
