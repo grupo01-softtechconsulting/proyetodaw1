@@ -1,5 +1,5 @@
 """ Serializers for question app """
-from prueba import settings
+from forumserver import settings
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer, DateTimeField
 from drf_extra_fields.fields import Base64ImageField
