@@ -31,30 +31,26 @@ class QuestionAPI(ModelViewSet):
     def get_queryset(self):
         """ Redefinition of queryset for the view """
         if 'person_id' in self.request.GET:
-            if 'all_questions' in self.request.GET:
-                '''if 'by_tag' in self.request.GET:
-                    queryset = (Question.objects.all()
-                                .order_by('-questiontag__tag__name'))
-                elif 'newest' in self.request.GET:
-                    queryset = (Question.objects.all()
-                                .order_by('-creation_date'))
-                elif 'oldest' in self.request.GET:
-                    queryset = (Question.objects.all()
-                                .order_by('creation_date'))
-                elif 'by_likes' in self.request.GET:
-                    only_likes = Count('questionpersonlike',
-                                       filter=Q(questionpersonlike__like=True))
-                    queryset = (Question.objects.annotate(only_likes=only_likes)
-                                .order_by('-only_likes'))
-                elif 'id_tag' in self.request.GET:
-                    queryset = (Question.objects
-                                .filter(questiontag__tag__id=self.request
-                                        .GET['id_tag']))'''
-                else:
-                    queryset = Question.objects.all()
-            else:
+            '''if 'by_tag' in self.request.GET:
+                queryset = (Question.objects.all()
+                            .order_by('-questiontag__tag__name'))
+            elif 'newest' in self.request.GET:
+                queryset = (Question.objects.all()
+                            .order_by('-creation_date'))
+            elif 'oldest' in self.request.GET:
+                queryset = (Question.objects.all()
+                            .order_by('creation_date'))
+            elif 'by_likes' in self.request.GET:
+                only_likes = Count('questionpersonlike',
+                                    filter=Q(questionpersonlike__like=True))
+                queryset = (Question.objects.annotate(only_likes=only_likes)
+                            .order_by('-only_likes'))
+            elif 'id_tag' in self.request.GET:
                 queryset = (Question.objects
-                            .filter(creator__id=self.request.GET['person_id']))
+                            .filter(questiontag__tag__id=self.request
+                                    .GET['id_tag']))'''
+            queryset = (Question.objects
+                        .filter(creator__id=self.request.GET['person_id']))
         else:
             queryset = Question.objects.all()
         if 'last_questions' in self.request.GET:
