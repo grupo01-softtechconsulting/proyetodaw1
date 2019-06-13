@@ -39,8 +39,46 @@
                   </div>
                 </v-card-title>
                 <v-card-actions>
+                   <v-dialog
+      v-model="dialog"
+      width="500"
+    >
+      <template v-slot:activator="{ on }">
+          <v-btn dark v-on="on" flat color="primary" @click="addAnswer(item.creator.id)">Responder pregunta</v-btn>
+      </template>
+
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          {{ item.statement }}
+        </v-card-title>
+
+       <v-flex>
+        <v-textarea
+          v-model="answer"
+          solo
+          name="input-7-4"
+          label="Ingrese respuesta"
+        ></v-textarea>
+      </v-flex>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            flat
+            @click="addAnswerInsert(item.creator.id)"
+          >
+            Responder
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
                   <v-btn flat color="primary" @click="addQuestion(item.creator.id)">Nueva pregunta</v-btn>
-                  <v-btn flat color="primary" @click="addAnswer(item.creator.id)">Responder pregunta</v-btn>
                   <v-spacer></v-spacer>
                 </v-card-actions>
               </v-card>
@@ -62,7 +100,9 @@ export default {
     timeout: null,
     questions: [],
     idSelected: "",
-    showMoreInfo: false
+    showMoreInfo: false,
+    dialog: false,
+    answer: ''
   }),
   created() {
     this.isLoadingpage = true
@@ -75,9 +115,25 @@ export default {
   },
   methods: {
     addQuestion () {
-
     },
     addAnswer () {
+     
+
+    },
+    addAnswerInsert(id){
+
+        let jsonData = {
+          question_id: id,
+          statement: this.answer
+        }
+        apiQuestion.createAnswer(jsonData).then(res => {
+          if (res.status) {
+            localStorage.setItem('personId', res.person_id)
+            this.dialog = false
+          } else {
+            this.dialog = false
+          }
+        })
 
     }
   },
