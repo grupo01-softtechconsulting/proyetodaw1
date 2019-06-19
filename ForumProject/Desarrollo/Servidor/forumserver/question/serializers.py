@@ -1,5 +1,5 @@
 """ Serializers for question app """
-from prueba import settings
+from forumserver import settings
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer, DateTimeField
 from drf_extra_fields.fields import Base64ImageField
@@ -26,13 +26,15 @@ class QuestionSerializer(ModelSerializer):
     likes = SerializerMethodField()
     dislikes = SerializerMethodField()
     has_like = SerializerMethodField()
+    active_answer = SerializerMethodField()
     creation_date = DateTimeField(read_only=True, format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
         """ Meta class for question serializer """
         model = Question
         fields = ['id', 'creator', 'title', 'statement', 'creation_date',
-                  'image_question', 'tags', 'likes', 'dislikes', 'has_like']
+                  'image_question', 'tags', 'likes', 'dislikes', 'has_like',
+                  'active_answer']
         extra_kwargs = {'id': {'read_only': True, 'required': False}}
 
     def __init__(self, *args, **kwargs):
@@ -71,6 +73,10 @@ class QuestionSerializer(ModelSerializer):
             return TagSerializer(tags_obj, many=True).data
         else:
             return "No tags"
+
+    def get_active_answer(self, obj):
+        """ Methos to show answers """
+        return False
 
     def get_likes(self, obj):
         """ Method to obtain likes for a question """
