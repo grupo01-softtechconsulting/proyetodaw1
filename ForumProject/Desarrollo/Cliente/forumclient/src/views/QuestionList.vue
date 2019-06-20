@@ -4,7 +4,7 @@
       <v-flex xs12 sm8 offset-sm2>
         <v-card class="card--flex-toolbar">
           <v-toolbar card prominent>
-            <v-toolbar-title class="subheading">Listado de Preguntas</v-toolbar-title>
+            <v-toolbar-title class="subheading">Listado de Preguntas<v-btn flat color="primary" @click="addQuestion()">Nueva pregunta</v-btn></v-toolbar-title>
           </v-toolbar>
 
           <v-divider></v-divider>
@@ -78,7 +78,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-                  <v-btn flat color="primary" @click="addQuestion(item.creator.id)">Nueva pregunta</v-btn>
+                  
                   <v-spacer></v-spacer>
                 </v-card-actions>
               </v-card>
@@ -87,6 +87,33 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <v-dialog v-model="dialogQuestion" max-width="290">
+      <v-card>
+        <v-card-title class="headline">Nueva pregunta</v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12 sm12>
+                <v-text-field 
+                  label="Titulo"
+                  required
+                  v-model="title"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm12>
+                <v-text-field
+                  label="Contenido"
+                  required
+                  v-model="content"></v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary darken-1" flat="flat" @click="saveQuestion(1)">Agregar pregunta</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -96,6 +123,9 @@ import apiQuestion from "@/services/question"
 export default {
   data: () => ({
     isLoadingpage: false,
+    dialogQuestion: false,
+    title: '',
+    content: '',
     nextPage: null,
     timeout: null,
     questions: [],
@@ -114,8 +144,27 @@ export default {
       });
   },
   methods: {
-    addQuestion () {
+    saveQuestion () {
+      let jsonData = {
+          title: this.title,
+          statement: this.content
+        }
+        apiQuestion.createQuestion(jsonData).then(res => {
+            this.dialogQuestion = false
+            this.questions = []
+            apiQuestion
+            .getAllQuestionsList({})
+            .then(res => {
+              this.questions = res
+              this.isLoadingpage = false
+            });
+        })
     },
+
+    addQuestion() {
+      this.dialogQuestion = true
+    },
+
     addAnswer () {
      
 
@@ -124,7 +173,7 @@ export default {
 
         let jsonData = {
           question_id: id,
-          statement: this.answer
+          statement: this.content
         }
         apiQuestion.createAnswer(jsonData).then(res => {
           if (res.status) {
