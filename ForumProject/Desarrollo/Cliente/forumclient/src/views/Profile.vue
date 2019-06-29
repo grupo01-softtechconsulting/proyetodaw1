@@ -50,7 +50,8 @@
               </v-card-text>
               <v-card-actions>
                 <v-btn v-if="!editActive" block color="primary" @click="activateEdit" :loading="loadingButton">Editar</v-btn>
-                <v-btn v-if="editActive" block color="primary" @click="editProfile" :loading="loadingButton">Giardar Cambios</v-btn>
+                <v-btn v-if="editActive" block color="primary" @click="editProfile" :loading="loadingButton">Guardar Cambios</v-btn>
+                <v-btn v-if="editActive" block color="blank" @click="cancelEdit" :loading="loadingButton">Cancelar</v-btn>
               </v-card-actions>
             </v-card>
           </v-flex>
@@ -118,6 +119,16 @@ export default {
   methods: {
     activateEdit() {
       this.editActive = true
+    },
+    cancelEdit () {
+      this.editActive = false
+      api
+      .obtainPerson()
+      .then(res => {
+        this.firstName = res.user.first_name
+        this.lastName = res.user.last_name
+        this.email = res.user.email
+      });
     },
     editProfile () {
       this.loadingButton = true

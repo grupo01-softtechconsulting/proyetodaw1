@@ -9,80 +9,102 @@
 
           <v-divider></v-divider>
 
-          <v-card-text v-if="questions.length > 0" style="height: auto;">
-            <!--<v-layout row wrap>
+          <v-card-text style="height: auto;">
+            <v-layout row wrap>
               <v-flex>
                 <v-text-field
-                  v-model="searchText"
+                  v-model="autorText"
                   solo
-                  label="Buscar paciente"
+                  label="Buscar por autor"
                   prepend-inner-icon="search"
-                  @keyup="searchPatientData"
+                  @keyup="searchAutor"
                 ></v-text-field>
               </v-flex>
-            </v-layout> -->
+            </v-layout>
+            <v-layout  v-if="!isLoadingpage && questions.length > 0" row wrap>
+              <v-flex xs6 sm6 d-flex>
+                <v-select
+                  :items="sortItems"
+                  label="Ordenar por"
+                  v-model="valuesItems"
+                  @change="sortQuestions"
+                ></v-select>
+              </v-flex>
+              <v-flex xs6 sm6 d-flex>
+                <v-switch
+                  v-model="showMyQuestions"
+                  label="Mis preguntas"
+                  @change="changeShowMyQuestions"
+                ></v-switch>
+              </v-flex>
+            </v-layout>
             <template v-if="isLoadingpage">
               <div class="text-xs-center">
                 <v-progress-circular :size="50" color="primary" indeterminate></v-progress-circular>
               </div>
             </template>
-            <template v-for="item in questions">
-              <v-card v-show="!isLoadingpage" :key="item.id">
-                <v-card-title primary-title>
-                  <div>
-                    <div
-                      class="headline"
-                    >{{ item.title }}</div>
-                    <span class="grey--text">Fecha de realización: {{ item.creation_date }}</span>
-                    <br>
-                    <span>{{ item.statement }}</span>
-                  </div>
-                </v-card-title>
-                <v-card-actions>
-                   <v-dialog
-      v-model="dialog"
-      width="500"
-    >
-      <template v-slot:activator="{ on }">
-          <v-btn dark v-on="on" flat color="primary" @click="addAnswer(item.creator.id)">Responder pregunta</v-btn>
-      </template>
+            <div v-if="!isLoadingpage && questions.length > 0">
+              <template v-for="item in questions">
+                <v-card v-show="!isLoadingpage" :key="item.id">
+                  <v-card-title primary-title>
+                    <div>
+                      <div class="headline">{{ item.title }}</div>
+                      <span class="grey--text">Fecha de realización: {{ item.creation_date }}</span>
+                      <br>
+                      <span class="grey--text">Autor: {{ item.creator.user.first_name }} {{ item.creator.user.last_name }}</span>
+                      <br>
+                      <span>{{ item.statement }}</span>
+                      <br>
+                      <span v-if="item.edit_date" class="grey--text">Ultima edicion: {{ item.edit_date }}</span>
+                    </div>
+                  </v-card-title>
 
-      <v-card>
-        <v-card-title
-          class="headline grey lighten-2"
-          primary-title
-        >
-          {{ item.statement }}
-        </v-card-title>
-
-       <v-flex>
-        <v-textarea
-          v-model="answer"
-          solo
-          name="input-7-4"
-          label="Ingrese respuesta"
-        ></v-textarea>
-      </v-flex>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            flat
-            @click="addAnswerInsert(item.creator.id)"
-          >
-            Responder
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-                  
-                  <v-spacer></v-spacer>
-                </v-card-actions>
-              </v-card>
-            </template>
+                  <v-card-actions>
+                    <v-btn flat color="primary" @click="showDialogAnswer(item)">Responder pregunta</v-btn>
+                    <v-overflow-btn
+                      v-if="checkAutorQuestion(item.creator.id)"
+                      :items="optionsQuestion"
+                      v-model="valuesOptionsQuestion"
+                      @change="makeActionQuestion(item)"
+                      label="Opciones"
+                    ></v-overflow-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      icon
+                      @click="showAnswers(item)"
+                    >
+                      <v-icon>{{ item.active_answer ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</v-icon>
+                    </v-btn>
+                  </v-card-actions>
+                  <v-slide-y-transition>
+                    <v-card-text v-show="item.active_answer">
+                      <div v-if="item.list_answers.length > 0">
+                        <span>Listado de respuestas:</span>
+                        <template v-for="answerItem in item.list_answers">
+                          <v-card :key="answerItem.id">
+                            <v-card-title primary-title>
+                              <div>
+                                <v-btn small flat color="primary" v-if="checkAutorAnswer(answerItem.creator.id)" @click="editAnswer(item, answerItem)">Editar respuesta</v-btn>
+                                <h5>Autor: {{ answerItem.creator.user.first_name }} {{ answerItem.creator.user.last_name }}</h5>
+                                <span class="grey--text">Fecha de realización: {{ answerItem.creation_date }}</span>
+                                <br>
+                                <span>{{ answerItem.statement }}</span>
+                              </div>
+                            </v-card-title>
+                          </v-card>
+                        </template>
+                      </div>
+                      <div v-if="item.list_answers.length == 0">
+                        <h4>No hay respuestas que mostrar</h4>
+                      </div>
+                    </v-card-text>
+                  </v-slide-y-transition>
+                </v-card>
+              </template>
+            </div>
+            <div v-if="!isLoadingpage && questions.length == 0">
+              <h2>No hay preguntas que mostrar</h2>
+            </div>
           </v-card-text>
         </v-card>
       </v-flex>
@@ -94,7 +116,7 @@
           <v-container grid-list-md>
             <v-layout wrap>
               <v-flex xs12 sm12>
-                <v-text-field 
+                <v-text-field
                   label="Titulo"
                   required
                   v-model="title"></v-text-field>
@@ -166,7 +188,7 @@ export default {
     },
 
     addAnswer () {
-     
+
 
     },
     addAnswerInsert(id){
