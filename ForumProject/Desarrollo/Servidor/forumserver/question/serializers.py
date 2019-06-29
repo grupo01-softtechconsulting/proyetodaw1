@@ -1,5 +1,6 @@
 """ Serializers for question app """
 from forumserver import settings
+from django.utils import timezone
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer, DateTimeField
 from drf_extra_fields.fields import Base64ImageField
@@ -29,13 +30,14 @@ class QuestionSerializer(ModelSerializer):
     active_answer = SerializerMethodField()
     list_answers = SerializerMethodField()
     creation_date = DateTimeField(read_only=True, format="%Y-%m-%d %H:%M:%S")
+    edit_date = DateTimeField(read_only=True, format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
         """ Meta class for question serializer """
         model = Question
         fields = ['id', 'creator', 'title', 'statement', 'creation_date',
                   'image_question', 'tags', 'likes', 'dislikes', 'has_like',
-                  'active_answer', 'list_answers']
+                  'active_answer', 'list_answers', 'edit_date']
         extra_kwargs = {'id': {'read_only': True, 'required': False}}
 
     def __init__(self, *args, **kwargs):
@@ -56,6 +58,11 @@ class QuestionSerializer(ModelSerializer):
                                                       tag=tag)
             question_tag.save()
         return question
+
+    def update(self, instance, validated_data):
+        instance.edit_date = timezone.now()
+        instance.save()
+        return ModelSerializer.update(self, instance, validated_data)
 
     def get_image_question(self, obj):
         """ Method to obtain an image for a question """
@@ -143,6 +150,7 @@ class QuestionImageSerializer(ModelSerializer):
 class AnswerSerializer(ModelSerializer):
     """ Serializer for Answer model """
     creation_date = DateTimeField(read_only=True, format="%Y-%m-%d %H:%M:%S")
+    edit_date = DateTimeField(read_only=True, format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
         """ Meta class for answer serializer """
@@ -162,6 +170,11 @@ class AnswerSerializer(ModelSerializer):
             self.fields['creator'] = PersonSerializer(context=kwargs['context'])
             self.fields['question'] = QuestionSerializer(context=kwargs
                                                          ['context'])
+
+    def update(self, instance, validated_data):
+        instance.edit_date = timezone.now()
+        instance.save()
+        return ModelSerializer.update(self, instance, validated_data)
 
 
 class QuestionTagSerializer(ModelSerializer):

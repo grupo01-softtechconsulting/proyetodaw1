@@ -31,41 +31,25 @@ class QuestionAPI(ModelViewSet):
     def get_queryset(self):
         """ Redefinition of queryset for the view """
         if 'person_id' in self.request.GET:
-            '''if 'by_tag' in self.request.GET:
-                queryset = (Question.objects.all()
-                            .order_by('-questiontag__tag__name'))
-            elif 'newest' in self.request.GET:
-                queryset = (Question.objects.all()
-                            .order_by('-creation_date'))
-            elif 'oldest' in self.request.GET:
-                queryset = (Question.objects.all()
-                            .order_by('creation_date'))
-            elif 'by_likes' in self.request.GET:
-                only_likes = Count('questionpersonlike',
-                                    filter=Q(questionpersonlike__like=True))
-                queryset = (Question.objects.annotate(only_likes=only_likes)
-                            .order_by('-only_likes'))
-            elif 'id_tag' in self.request.GET:
-                queryset = (Question.objects
-                            .filter(questiontag__tag__id=self.request
-                                    .GET['id_tag']))'''
-            queryset = (Question.objects
-                        .filter(creator__id=self.request.GET['person_id']))
-        else:
             queryset = Question.objects.all()
-        if 'autor_text' in self.request.GET:
-            text_search = self.request.GET['autor_text']
-            queryset = (queryset.filter(Q(creator__user__first_name__icontains=text_search) |
-                                        Q(creator__user__last_name__icontains=text_search)))
-        if 'last_questions' in self.request.GET:
-            queryset = (queryset.order_by('-creation_date')[:5])
+            if 'my_questions' in self.request.GET:
+                queryset = (queryset.filter(creator__id=self.request.GET['person_id']))
+            if 'search_autor' in self.request.GET:
+                text_search = self.request.GET['search_autor']
+                queryset = (queryset.filter(Q(creator__user__first_name__icontains=text_search) |
+                                            Q(creator__user__last_name__icontains=text_search)))
+            if 'last_questions' in self.request.GET:
+                queryset = (queryset.order_by('-creation_date')[:5])
+            else:
+                if 'by_tag' in self.request.GET:
+                    queryset = (queryset.order_by('-questiontag__tag__name'))
+                if 'order_by' in self.request.GET:
+                    if self.request.GET['order_by'] == 'newest':
+                        queryset = (queryset.order_by('-creation_date'))
+                    elif self.request.GET['order_by'] == 'oldest':
+                        queryset = (queryset.order_by('creation_date'))
         else:
-            if 'by_tag' in self.request.GET:
-                queryset = (queryset.order_by('-questiontag__tag__name'))
-            elif 'newest' in self.request.GET:
-                queryset = (queryset.order_by('-creation_date'))
-            elif 'oldest' in self.request.GET:
-                queryset = (queryset.order_by('creation_date'))
+            queryset = []
         return queryset
 
 

@@ -7,7 +7,7 @@
     v-model="drawer"
     >
     <v-toolbar color="primary darken-1" dark>
-      <img src="@/assets/avatar-img.png" height="36" alt="Predictor Web">
+      <img src="@/assets/avatar-img.png" height="36" alt="Foro Web">
       <v-toolbar-title class="ml-0 pl-3">
         <span class="hidden-sm-and-down">Foro Web</span>
       </v-toolbar-title>
@@ -55,6 +55,7 @@ export default {
     drawer: false,
     items: [
       { title: 'Perfil', icon: 'assignment', component: 'profile', name: 'profile' },
+      // { title: 'Mis Preguntas', icon: 'list_alt', component: 'my-questions', name: 'my-questions' },
       { title: 'Listado de Preguntas', icon: 'list_alt', component: 'question-list', name: 'question-list' }
     ]
   }),
@@ -63,11 +64,13 @@ export default {
     if (localStorage.getItem('rValue') == 1) {
       this.items = [
         { title: 'Perfil', icon: 'assignment', component: 'profile', name: 'profile' },
+        // { title: 'Mis Preguntas', icon: 'list_alt', component: 'my-questions', name: 'my-questions' },
         { title: 'Listado de Preguntas', icon: 'list_alt', component: 'question-list', name: 'question-list' }
       ]
     } else {
       this.items = [
         { title: 'Perfil', icon: 'assignment', component: 'profile', name: 'profile' },
+        // { title: 'Mis Preguntas', icon: 'list_alt', component: 'my-questions', name: 'my-questions' },
         { title: 'Listado de Preguntas', icon: 'list_alt', component: 'question-list', name: 'question-list' }
       ]
     }
