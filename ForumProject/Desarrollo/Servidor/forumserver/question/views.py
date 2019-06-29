@@ -53,6 +53,10 @@ class QuestionAPI(ModelViewSet):
                         .filter(creator__id=self.request.GET['person_id']))
         else:
             queryset = Question.objects.all()
+        if 'autor_text' in self.request.GET:
+            text_search = self.request.GET['autor_text']
+            queryset = (queryset.filter(Q(creator__user__first_name__icontains=text_search) |
+                                        Q(creator__user__last_name__icontains=text_search)))
         if 'last_questions' in self.request.GET:
             queryset = (queryset.order_by('-creation_date')[:5])
         else:

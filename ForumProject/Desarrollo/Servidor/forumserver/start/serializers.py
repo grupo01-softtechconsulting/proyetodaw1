@@ -48,10 +48,10 @@ class PersonSerializer(ModelSerializer):
                     user.first_name = user_data['first_name']
             if 'last_name' in user_data:
                 if user_data['last_name'] != '':
-                    user.first_name = user_data['last_name']
+                    user.last_name = user_data['last_name']
             if 'email' in user_data:
                 if user_data['email'] != '':
-                    user.first_name = user_data['email']
+                    user.email = user_data['email']
             user.save()
         if 'role' in validated_data:
             instance.type = validated_data.pop('role')

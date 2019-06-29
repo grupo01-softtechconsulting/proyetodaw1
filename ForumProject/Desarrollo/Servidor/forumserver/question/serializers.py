@@ -27,6 +27,7 @@ class QuestionSerializer(ModelSerializer):
     dislikes = SerializerMethodField()
     has_like = SerializerMethodField()
     active_answer = SerializerMethodField()
+    list_answers = SerializerMethodField()
     creation_date = DateTimeField(read_only=True, format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
@@ -34,7 +35,7 @@ class QuestionSerializer(ModelSerializer):
         model = Question
         fields = ['id', 'creator', 'title', 'statement', 'creation_date',
                   'image_question', 'tags', 'likes', 'dislikes', 'has_like',
-                  'active_answer']
+                  'active_answer', 'list_answers']
         extra_kwargs = {'id': {'read_only': True, 'required': False}}
 
     def __init__(self, *args, **kwargs):
@@ -75,8 +76,12 @@ class QuestionSerializer(ModelSerializer):
             return "No tags"
 
     def get_active_answer(self, obj):
-        """ Methos to show answers """
+        """ Method to show answers """
         return False
+
+    def get_list_answers(self, obj):
+        """ Method to get an initial array of answers """
+        return []
 
     def get_likes(self, obj):
         """ Method to obtain likes for a question """
