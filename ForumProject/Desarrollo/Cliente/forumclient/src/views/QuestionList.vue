@@ -265,49 +265,247 @@ export default {
     }
   },
   methods: {
-    saveQuestion () {
-      let jsonData = {
+
+    changeShowMyQuestions () {
+      if (this.showMyQuestions) {
+        this.queryUrl['my_questions'] = 'true'
+      } else {
+        delete this.queryUrl['my_questions']
+      }
+      this.loadAjaxQuestions()
+    },
+
+    deleteQuestion() {
+      apiQuestion.deleteQuestion(this.questionSelected.id).then(res => {
+        this.queryUrl = {}
+        this.questionSelected = {
+          id: null,
+          statement: "",
+          title: ''
+        };
+        this.dialogConfirmDeleteQuestion = false
+        this.loadingDeleteQuestion = false;
+        this.title = ''
+        this.content = ''
+        this.loadAjaxQuestions()
+      });
+    },
+
+    updateQuestion() {
+      let dataAjax = {
+        question_id: this.questionSelected.id,
+        title: this.title,
+        statement: this.content
+      }
+      apiQuestion.updateQuestion(dataAjax).then(res => {
+        this.queryUrl = {}
+        this.questionSelected = {
+          id: null,
+          statement: "",
+          title: ''
+        };
+        this.dialogQuestion = false;
+        this.loadingSaveQuestion = false;
+        this.title = ''
+        this.content = ''
+        this.loadAjaxQuestions()
+      });
+    },
+
+    makeActionQuestion(itemQuestion) {
+      if (this.valuesOptionsQuestion.indexOf('Editar') != -1) {
+        this.$v.$reset();
+        this.activeEditQuestion = true
+        this.questionSelected.id = itemQuestion.id;
+        this.questionSelected.statement = itemQuestion.statement;
+        this.questionSelected.title = itemQuestion.title
+        this.title = itemQuestion.title
+        this.content = itemQuestion.statement
+        this.dialogQuestion = true;
+      } else {
+        this.questionSelected.id = itemQuestion.id;
+        this.questionSelected.statement = itemQuestion.statement;
+        this.questionSelected.title = itemQuestion.title
+        this.dialogConfirmDeleteQuestion = true
+      }
+    },
+
+    editAnswer (itemQuestion, itemAnswer) {
+      this.activeEditAnswer = true
+      this.$v.$reset();
+      this.questionSelected.id = itemQuestion.id;
+      this.questionSelected.statement = itemQuestion.statement;
+      this.answerToUpdate = itemAnswer.id
+      this.answer = itemAnswer.statement
+      this.dialogAnswer = true;
+    },
+
+    updateAnswer () {
+      let dataAjax = {
+        answer_id: this.answerToUpdate,
+        statement: this.answer
+      }
+      apiQuestion.updateAnswer(dataAjax).then(res => {
+        this.questionSelected = {
+          id: null,
+          statement: "",
+          title: ''
+        };
+        window.location.reload()
+      });
+    },
+
+    checkAutorAnswer (idAutor) {
+      if (idAutor == localStorage.getItem('personId')) {
+        return true
+      }
+      return false
+    },
+
+    checkAutorQuestion(idAutor) {
+      if (idAutor == localStorage.getItem('personId')) {
+        return true
+      }
+      return false
+    },
+
+    sortQuestions () {
+      delete this.globalParams['last_questions']
+      if (this.valuesItems.indexOf('nuevo') != -1) {
+        this.globalParams['newest'] = 'true'
+        delete this.globalParams['oldest']
+        this.queryUrl['order_by'] = 'newest'
+        
+      } else {
+        this.globalParams['oldest'] = 'true'
+        delete this.globalParams['newest']
+        this.queryUrl['order_by'] = 'oldest'
+      }
+      this.loadAjaxQuestions()
+    },
+
+    searchAutor() {
+      let _self = this
+      this.isLoadingpage = true
+      clearTimeout(this.timeout)
+      if (this.autorText.trim() !== "") {
+        this.timeout = setTimeout(function() {
+          _self.globalParams['autor_text'] = _self.autorText
+          _self.queryUrl['search_autor'] = _self.autorText
+          _self.loadAjaxQuestions()
+        }, 500)
+      } else {
+        this.timeout = setTimeout(function() {
+          delete _self.globalParams['autor_text']
+          delete _self.queryUrl['search_autor']
+          _self.loadAjaxQuestions()
+        }, 500)
+      }
+    },
+
+    loadAjaxQuestions () {
+      //this.isLoadingpage = true;
+      this.questions = []
+      apiQuestion.getAllQuestionsList(this.queryUrl).then(res => {
+        this.questions = res;
+        this.$router.push({query: this.queryUrl})
+        this.isLoadingpage = false;
+      });
+    },
+
+    showAnswers (item) {
+      item.active_answer = !item.active_answer
+      if (item.active_answer) {
+        item.list_answers = []
+        apiQuestion.getAnswersList(item.id).then(res => {
+          item.list_answers = res
+        });
+      }
+    },
+
+    saveQuestion() {
+      this.loadingSaveQuestion = true;
+      this.$v.$touch();
+      if (!this.$v.title.$invalid && !this.$v.content.$invalid) {
+        let jsonData = {
           title: this.title,
           statement: this.content
-        }
+        };
         apiQuestion.createQuestion(jsonData).then(res => {
-            this.dialogQuestion = false
-            this.questions = []
-            apiQuestion
-            .getAllQuestionsList({})
-            .then(res => {
-              this.questions = res
-              this.isLoadingpage = false
-            });
-        })
+          this.dialogQuestion = false;
+          this.questions = [];
+          this.queryUrl = {}
+          apiQuestion.getAllQuestionsList(this.queryUrl).then(res => {
+            this.questions = res;
+            this.$router.push({query: this.queryUrl})
+            this.loadingSaveQuestion = false;
+            this.isLoadingpage = false;
+            this.title = ''
+            this.content = ''
+          });
+        });
+      } else {
+        this.loadingSaveQuestion = false;
+      }
     },
 
     addQuestion() {
-      this.dialogQuestion = true
+      this.$v.$reset();
+      this.activeEditQuestion = false
+      this.dialogQuestion = true;
     },
 
-    addAnswer () {
-
-
+    cancelQuestion() {
+      this.title = ''
+      this.content = ''
+      this.dialogQuestion = false;
     },
-    addAnswerInsert(id){
 
+    showDialogAnswer(itemSelected) {
+      this.activeEditAnswer = false
+      this.$v.$reset();
+      this.questionSelected.id = itemSelected.id;
+      this.questionSelected.statement = itemSelected.statement;
+      this.dialogAnswer = true;
+    },
+
+    cancelAnswer() {
+      this.answer = ''
+      this.questionSelected = {
+        id: null,
+        statement: "",
+        title: ''
+      };
+      this.dialogAnswer = false;
+    },
+
+    addAnswerInsert(id) {
+      this.loadingSaveAnswer = true;
+      this.$v.$touch();
+      if (!this.$v.answer.$invalid) {
         let jsonData = {
           question_id: id,
-          statement: this.content
-        }
+          statement: this.answer
+        };
         apiQuestion.createAnswer(jsonData).then(res => {
+          this.loadingSaveAnswer = false;
+          this.answer = ''
           if (res.status) {
-            localStorage.setItem('personId', res.person_id)
-            this.dialog = false
+            localStorage.setItem("personId", res.person_id);
+            this.dialogAnswer = false;
+            
           } else {
-            this.dialog = false
+            this.dialogAnswer = false;
           }
-        })
-
+          window.location.reload()
+        });
+      } else {
+        this.loadingSaveAnswer = false;
+      }
     }
   },
-  mounted () {
+
+  mounted() {
     // this.scroll()
   }
 };
