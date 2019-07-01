@@ -109,30 +109,82 @@
         </v-card>
       </v-flex>
     </v-layout>
-    <v-dialog v-model="dialogQuestion" max-width="290">
+   <v-dialog v-model="dialogAnswer" max-width="600">
       <v-card>
-        <v-card-title class="headline">Nueva pregunta</v-card-title>
+        <v-card-title class="headline">{{ questionSelected.statement }}</v-card-title>
         <v-card-text>
           <v-container grid-list-md>
-            <v-layout wrap>
+            <v-layout wrap>  
               <v-flex xs12 sm12>
-                <v-text-field
-                  label="Titulo"
+                <v-textarea
+                  v-model="answer"
                   required
-                  v-model="title"></v-text-field>
-              </v-flex>
-              <v-flex xs12 sm12>
-                <v-text-field
-                  label="Contenido"
-                  required
-                  v-model="content"></v-text-field>
+                  label="Escriba su respuesta"
+                  :error-messages="answerErrors"
+                  @input="$v.answer.$touch()"
+                  @blur="$v.answer.$touch()"
+                ></v-textarea>
               </v-flex>
             </v-layout>
           </v-container>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary darken-1" flat="flat" @click="saveQuestion(1)">Agregar pregunta</v-btn>
+          <v-flex row>
+            <v-btn v-if="!activeEditAnswer" color="primary darken-1" flat="flat" @click="addAnswerInsert(questionSelected.id)" :loading="loadingSaveAnswer">Guardar respuesta</v-btn>
+            <v-btn v-if="activeEditAnswer" color="primary darken-1" flat="flat" @click="updateAnswer()" :loading="loadingSaveAnswer">Actualizar respuesta</v-btn>
+            <v-btn color="blank darken-1" flat="flat" @click="cancelAnswer()">Cancelar</v-btn>
+          </v-flex>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogQuestion" max-width="600">
+      <v-card>
+        <v-card-title v-if="!activeEditQuestion" class="headline">Nueva pregunta</v-card-title>
+        <v-card-title v-if="activeEditQuestion" class="headline">Editar pregunta</v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12 sm12>
+                <v-text-field 
+                  label="Titulo"
+                  required
+                  :error-messages="titleErrors"
+                  v-model="title"
+                  @input="$v.title.$touch()"
+                  @blur="$v.title.$touch()"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm12>
+                <v-textarea
+                  label="Contenido"
+                  required
+                  :error-messages="contentErrors"
+                  v-model="content"
+                  @input="$v.content.$touch()"
+                  @blur="$v.content.$touch()"></v-textarea>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-flex row>
+            <v-btn v-if="!activeEditQuestion" color="primary darken-1" flat="flat" @click="saveQuestion()" :loading="loadingSaveQuestion">Agregar pregunta</v-btn>
+            <v-btn v-if="activeEditQuestion" color="primary darken-1" flat="flat" @click="updateQuestion()" :loading="loadingSaveQuestion">Editar pregunta</v-btn>
+            <v-btn color="blank darken-1" flat="flat" @click="cancelQuestion()">Cancelar</v-btn>
+          </v-flex>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogConfirmDeleteQuestion" max-width="300">
+      <v-card>
+        <v-card-title class="headline">Eliminar pregunta</v-card-title>
+        <v-card-text>
+          <h3>Esta seguro que desea eliminar la pregunta?</h3>
+        </v-card-text>
+        <v-card-actions>
+          <v-flex row>
+            <v-btn color="primary darken-1" flat="flat" @click="deleteQuestion()" :loading="loadingDeleteQuestion">Aceptar</v-btn>
+            <v-btn color="blank darken-1" flat="flat" @click="cancelDeleteQuestion()">Cancelar</v-btn>
+          </v-flex>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -140,30 +192,77 @@
 </template>
 
 <script>
-import apiQuestion from "@/services/question"
+import { validationMixin } from "vuelidate";
+import { required } from "vuelidate/lib/validators";
+import apiQuestion from "@/services/question";
 
 export default {
+  mixins: [validationMixin],
+  validations: {
+    title: { required },
+    content: { required },
+    answer: { required }
+  },
   data: () => ({
     isLoadingpage: false,
     dialogQuestion: false,
-    title: '',
-    content: '',
+    dialogAnswer: false,
+    loadingSaveQuestion: false,
+    loadingSaveAnswer: false,
+    sortItems: ['Más nuevo', 'Más antiguo'],
+    valuesItems: [0,1],
+    optionsQuestion: ['Editar pregunta', 'Eliminar pregunta'],
+    valuesOptionsQuestion: [0,1],
+    title: "",
+    content: "",
     nextPage: null,
     timeout: null,
     questions: [],
+    answers: [],
     idSelected: "",
     showMoreInfo: false,
-    dialog: false,
-    answer: ''
+    answer: "",
+    questionSelected: {
+      id: null,
+      statement: "",
+      title: ""
+    },
+    globalParams: {},
+    autorText: '',
+    queryUrl: {},
+    answerToUpdate: null,
+    activeEditAnswer: false,
+    activeEditQuestion: false,
+    dialogConfirmDeleteQuestion: false,
+    loadingDeleteQuestion: false,
+    showMyQuestions: false
   }),
   created() {
-    this.isLoadingpage = true
-    apiQuestion
-      .getAllQuestionsList({})
-      .then(res => {
-        this.questions = res
-        this.isLoadingpage = false
-      });
+    this.isLoadingpage = true;
+    this.globalParams['last_questions'] = 'true'
+    this.loadAjaxQuestions()
+  },
+  computed: {
+    titleErrors() {
+      const errors = [];
+      if (!this.$v.title.$dirty) return errors;
+      !this.$v.title.required &&
+        errors.push("Debe poner un titulo a la pregunta");
+      return errors;
+    },
+    contentErrors() {
+      const errors = [];
+      if (!this.$v.content.$dirty) return errors;
+      !this.$v.content.required &&
+        errors.push("Debe poner un contenido para la pregunta");
+      return errors;
+    },
+    answerErrors() {
+      const errors = [];
+      if (!this.$v.answer.$dirty) return errors;
+      !this.$v.answer.required && errors.push("Debe escribir una respuesta");
+      return errors;
+    }
   },
   methods: {
     saveQuestion () {
