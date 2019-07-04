@@ -102,15 +102,17 @@ class RegisterUserAPI(APIView):
         dictionary_post['email'] = self.request.data['email']
         dictionary_post['username'] = self.request.data['username']
         dictionary_post['password'] = self.request.data['password']
-        new_user = create_user(dictionary_post)
-        if new_user is not None:
-            if new_user:
-                new_user_auth = authenticate(username=dictionary_post['username'],
-                                             password=dictionary_post['password'])
-                if new_user_auth:
-                    login(request, new_user_auth)
-                    return Response({'status': True,
-                                     'person_id': new_user.person.id})
-                else:
-                    return Response({'status': False})
+        if (not User.objects.filter(email=dictionary_post['email']).exists() and
+            not User.objects.filter(username=dictionary_post['username']).exists()):
+            new_user = create_user(dictionary_post)
+            if new_user is not None:
+                if new_user:
+                    new_user_auth = authenticate(username=dictionary_post['username'],
+                                                password=dictionary_post['password'])
+                    if new_user_auth:
+                        login(request, new_user_auth)
+                        return Response({'status': True,
+                                        'person_id': new_user.person.id})
+                    else:
+                        return Response({'status': False})
         return Response({'status': False})

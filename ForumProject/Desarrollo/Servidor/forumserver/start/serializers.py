@@ -40,6 +40,13 @@ class PersonSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         """ Function to update user information """
+        if 'email' in validated_data:
+            users_with_email = Person.objects.filter(
+                user__email=validated_data['email']).exclude(
+                    id=instance.id)
+            if users_with_email.count()>0:
+                # User with this email already exists
+                return ({"status": False, "message": "invalid email"})
         if 'user' in validated_data:
             user_data = validated_data.pop('user')
             user = instance.user
