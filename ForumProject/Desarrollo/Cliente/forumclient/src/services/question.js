@@ -25,7 +25,7 @@ api.createQuestion = function (questionData) {
 /** Updates a question */
 api.updateQuestion = function (questionData) {
   return axios.patch(
-    '/question/question-api/' + questionData['question_id'].toString() + '/',
+    '/question/question-api/' + questionData['question_id'].toString() + '/?person_id=' + localStorage.getItem('personId'),
     {
       title: questionData['title'],
       statement: questionData['statement']
@@ -40,7 +40,7 @@ api.updateQuestion = function (questionData) {
 /** Deletes a question */
 api.deleteQuestion = function (questionId) {
   return axios.delete(
-    '/question/question-api/' + questionId.toString() + '/',
+    '/question/question-api/' + questionId.toString() + '/?person_id=' + localStorage.getItem('personId'),
     { },
     { headers: {
       'Content-Type': 'application/json',
@@ -51,24 +51,13 @@ api.deleteQuestion = function (questionId) {
 
 /** Gets questions submitted to the platform */
 api.getAllQuestionsList = function (filtersData) {
-  var dataParams = {}
-  if ('last_questions' in filtersData) {
-    dataParams['last_questions'] = true
-  } else {
-    if ('by_tag' in filtersData) {
-      dataParams['by_tag'] = true
-    } else if ('newest' in filtersData) {
-      dataParams['newest'] = true
-    } else if ('oldest' in filtersData) {
-      dataParams['oldest'] = true
-    }
-  }
+  // filtersData['person_id'] = localStorage.getItem('personId')
   return axios.get(
-    '/question/question-api/',
-    dataParams,
+    '/question/question-api/?person_id=' + localStorage.getItem('personId'),
     { headers: {
       'Authorization': localStorage.getItem('token')
-    } }
+    },
+    params: filtersData }
   ).then(res => res.data)
 }
 
@@ -100,7 +89,7 @@ api.getSumittedQuestionsList = function (filtersData) {
 /** Gets data of a certain question */
 api.getQuestionData = function (questionId) {
   return axios.get(
-    '/question/question-api/' + questionId.toString() + '/',
+    '/question/question-api/' + questionId.toString() + '/?person_id=' + localStorage.getItem('personId'),
     {},
     { headers: {
       'Authorization': localStorage.getItem('token')
@@ -111,10 +100,8 @@ api.getQuestionData = function (questionId) {
 /** Gets answers submitted to a certain question */
 api.getAnswersList = function (questionId) {
   return axios.get(
-    '/question/answer-api/',
-    {
-      question_id: questionId
-    },
+    '/question/answer-api/?question_id=' + questionId,
+    {},
     { headers: {
       'Authorization': localStorage.getItem('token')
     } }

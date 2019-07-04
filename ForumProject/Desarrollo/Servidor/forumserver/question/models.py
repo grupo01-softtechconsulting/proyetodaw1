@@ -11,6 +11,7 @@ class Question(models.Model):
     statement = models.TextField()
     points = models.IntegerField(default=0)
     creation_date = models.DateTimeField(default=timezone.now)
+    edit_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         if self.title:
@@ -50,6 +51,7 @@ class Answer(models.Model):
     statement = models.TextField()
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(default=timezone.now)
+    edit_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.creator.user.get_full_name() + ' - ' + self.statement

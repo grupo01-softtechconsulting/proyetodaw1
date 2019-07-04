@@ -61,7 +61,7 @@
                     :type="showLeftMenu ? 'text' : 'password'"
                     label="Contraseña"
                     class="input-group--focused"
-                    @keyup.enter="login"
+                    @keyup.enter="register"
                     @click:append="showLeftMenu = !showLeftMenu"
                     required
                     @input="$v.password.$touch()"
