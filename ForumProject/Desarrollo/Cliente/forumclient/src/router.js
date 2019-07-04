@@ -16,7 +16,7 @@ const routes = [
     path: '/register',
     name: 'register',
     component: Register,
-    meta: { isPublic: false }
+    meta: { isPublic: true }
   },
   {
     path: '/profile',

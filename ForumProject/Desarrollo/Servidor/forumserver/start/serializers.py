@@ -44,15 +44,8 @@ class PersonSerializer(ModelSerializer):
             user_data = validated_data.pop('user')
             user = instance.user
             if 'email' in user_data:
-                users_with_email = Person.objects.filter(
-                    user__email=user_data['email']).exclude(
-                        id=instance.id)
-                if users_with_email.count()>0:
-                    # User with this email already exists
-                    return ({"status": False, "message": "invalid email"})
-                else:
-                    if user_data['email'] != '':
-                        user.email = user_data['email']
+                if user_data['email'] != '':
+                    user.email = user_data['email']
             if 'first_name' in user_data:
                 if user_data['first_name'] != '':
                     user.first_name = user_data['first_name']

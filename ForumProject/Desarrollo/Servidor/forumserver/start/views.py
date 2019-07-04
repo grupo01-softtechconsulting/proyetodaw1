@@ -86,6 +86,20 @@ class PersonAPI(ModelViewSet):
             queryset = Person.objects.all()
         return queryset
 
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        print('here')
+        if 'user' in self.request.data:
+            user_data = self.request.data['user']
+            instance = self.get_object()
+            print(instance.id)
+            if 'email' in user_data:
+                persons = (Person.objects.filter(user__email=user_data['email'])
+                           .exclude(id=instance.id))
+                if persons.exists():
+                    return Response({'status': False})
+        return self.update(request, *args, **kwargs)
+
 
 
 class RegisterUserAPI(APIView):

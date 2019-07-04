@@ -23,10 +23,14 @@
         </keep-alive>
       </transition>
     </template>
+    <pw-snackbar
+      :snackbarOptions="snackbarOptions"
+    />
   </div>
 </template>
 
 <script>
+import PwSnackbar from '@/components/Snackbar.vue'
 import CompDrawer from '@/components/Toolbar.vue'
 import CompToolbar from '@/components/Drawer.vue'
 import AppEvents from '@/event'
@@ -35,10 +39,15 @@ export default {
   name: 'App',
   components: {
     CompToolbar,
-    CompDrawer
+    CompDrawer,
+    PwSnackbar
   },
   data () {
     return {
+      snackbarOptions: {
+        show: false,
+        text: ''
+      }
     }
   },
   created () {

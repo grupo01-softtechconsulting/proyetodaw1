@@ -58,13 +58,18 @@
         </v-layout>
       </v-container>
     </v-content>
+    <CustomSnackbar
+      :snackbarOptions="snackbarOptions"
+    />
   </v-app>
 </template>
 
 <script>
+import CustomSnackbar from '@/components/Snackbar.vue'
 import { validationMixin } from 'vuelidate'
 import { required, email } from 'vuelidate/lib/validators'
 import api from '@/services/auth'
+import { setTimeout } from 'timers';
 
 export default {
   mixins: [validationMixin],
@@ -74,12 +79,17 @@ export default {
     email: { required, email }
   },
 
+  components: {
+    CustomSnackbar
+  },
+
   data: () => ({
     editActive: false,
     loadingButton: false,
     firstName: '',
     lastName: '',
     email: '',
+    snackbarOptions: { show: false, text: '' },
     showLeftMenu: false
   }),
 
@@ -141,8 +151,16 @@ export default {
           email: this.email
         }
         api.updatePerson(jsonData).then(res => {
-          this.editActive = false
-          this.loadingButton = false
+          if (res.status == false) {
+            this.snackbarOptions.show = true
+            this.snackbarOptions.text = 'Ha ingresado un correo inválido'
+            setTimeout(function() {
+              window.location.reload()
+            }, 500)
+          } else {
+            this.editActive = false
+            this.loadingButton = false
+          }
         })
       } else {
         this.loadingButton = false

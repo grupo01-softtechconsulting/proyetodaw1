@@ -77,10 +77,14 @@
         </v-layout>
       </v-container>
     </v-content>
+    <CustomSnackbar
+      :snackbarOptions="snackbarOptions"
+    />
   </v-app>
 </template>
 
 <script>
+import CustomSnackbar from '@/components/Snackbar.vue'
 import { validationMixin } from 'vuelidate'
 import { required, email } from 'vuelidate/lib/validators'
 import api from '@/services/auth'
@@ -95,6 +99,10 @@ export default {
     password: { required }
   },
 
+  components: {
+    CustomSnackbar
+  },
+
   data: () => ({
     loadingButton: false,
     firstName: '',
@@ -102,6 +110,7 @@ export default {
     email: '',
     username: '',
     password: '',
+    snackbarOptions: { show: false, text: '' },
     showLeftMenu: false
   }),
 
@@ -154,12 +163,20 @@ export default {
           password: this.password
         }
         api.register(jsonData).then(res => {
-          if (res.status) {
+          if (res.status == false) {
+            this.loadingButton = false
+            this.snackbarOptions.show = true
+            this.snackbarOptions.text = 'Ha ingresado un correo inválido'
+          } else {
+            localStorage.setItem('personId', res.person_id)
+            this.$router.push({ name: "profile" })
+          }
+          /*if (res.status) {
             localStorage.setItem('personId', res.person_id)
             this.$router.push({ name: "profile" })
           } else {
             this.loadingButton = false
-          }
+          }*/
         })
       } else {
         this.loadingButton = false
