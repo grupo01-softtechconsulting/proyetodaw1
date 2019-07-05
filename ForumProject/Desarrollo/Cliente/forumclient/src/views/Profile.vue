@@ -155,7 +155,8 @@ export default {
             this.snackbarOptions.show = true
             this.snackbarOptions.text = 'Ha ingresado un correo inválido'
             setTimeout(function() {
-              window.location.reload()
+              localStorage.clear()
+              window.getApp.$emit('APP_LOGOUT')
             }, 500)
           } else {
             this.editActive = false
