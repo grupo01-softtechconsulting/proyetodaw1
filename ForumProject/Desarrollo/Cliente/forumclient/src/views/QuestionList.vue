@@ -351,7 +351,12 @@ export default {
           statement: "",
           title: ''
         };
-        window.location.reload()
+        this.activeEditAnswer = false
+        this.$v.$reset();
+        this.dialogAnswer = false;
+        this.isLoadingpage = true;
+        this.globalParams['last_questions'] = 'true'
+        this.loadAjaxQuestions ()
       });
     },
 
@@ -497,7 +502,12 @@ export default {
           } else {
             this.dialogAnswer = false;
           }
-          window.location.reload()
+          this.activeEditAnswer = false
+          this.$v.$reset();
+          this.dialogAnswer = false;
+          this.isLoadingpage = true;
+          this.globalParams['last_questions'] = 'true'
+          this.loadAjaxQuestions ()
         });
       } else {
         this.loadingSaveAnswer = false;
